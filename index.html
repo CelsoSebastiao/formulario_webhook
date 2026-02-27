@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Captura de Lead - AutoVendas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen p-4">
+
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
+        <div class="bg-orange-600 p-6 text-white text-center">
+            <h2 class="text-2xl font-bold">Quero saber mais!</h2>
+            <p class="text-orange-100 mt-1">Preencha os dados e receba nosso contato.</p>
+        </div>
+        
+        <form id="leadForm" class="p-6 space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Nome Completo</label>
+                <input type="text" name="name" required placeholder="Ex: João Silva"
+                    class="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">E-mail</label>
+                <input type="email" name="email" required placeholder="joao@exemplo.com"
+                    class="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Telefone / WhatsApp</label>
+                <input type="tel" name="phone" placeholder="+258..."
+                    class="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Mensagem (Opcional)</label>
+                <textarea name="message" rows="3" placeholder="Tenho interesse no produto X..."
+                    class="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn"
+                class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-lg shadow-lg shadow-orange-200 transition-all transform active:scale-95">
+                ENVIAR AGORA
+            </button>
+        </form>
+
+        <div id="successMsg" class="hidden p-6 text-center text-green-600 font-medium">
+            ✅ Lead enviado com sucesso! Verifique seu CRM.
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURAÇÃO ---
+        const WEBHOOK_URL = 'http://localhost:8080/api/webhook/leads/c6d2281b86ee1268084128f0d8ac299f'; 
+        // -------------------
+
+        document.getElementById('leadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const form = e.target;
+            
+            // Feedback visual de carregamento
+            btn.disabled = true;
+            btn.innerText = 'ENVIANDO...';
+            btn.classList.add('opacity-50');
+
+            // Pegar os dados do formulário
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    form.classList.add('hidden');
+                    document.getElementById('successMsg').classList.remove('hidden');
+                } else {
+                    alert('Erro ao enviar. Verifique a URL do Webhook.');
+                    btn.disabled = false;
+                    btn.innerText = 'ENVIAR AGORA';
+                    btn.classList.remove('opacity-50');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro de conexão. Certifique-se que o backend está rodando.');
+                btn.disabled = false;
+                btn.innerText = 'ENVIAR AGORA';
+                btn.classList.remove('opacity-50');
+            }
+        });
+    </script>
+</body>
+</html>
